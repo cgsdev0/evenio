@@ -250,7 +250,7 @@ unsafe impl HandlerParam for &'_ Events {
 /// # Deriving
 ///
 /// The `Event` trait is automatically implementable by using the associated
-/// derive macro. The type must still satisfy the `Send + Sync + 'static` bound
+/// derive macro. The type must still satisfy the `'static` bound
 /// to do so.
 ///
 /// ```
@@ -285,7 +285,7 @@ unsafe impl HandlerParam for &'_ Events {
 /// #[derive(Event)]
 /// struct EmptyEvent;
 /// ```
-pub trait Event: Send + Sync + 'static {
+pub trait Event: 'static {
     /// If this event is considered "targeted" or "untargeted".
     ///
     /// If `true`, [`target`] is expected to successfully return the target of
@@ -669,10 +669,6 @@ impl EventQueue {
     }
 }
 
-// SAFETY: The bump allocator is only accessed behind an exclusive reference to
-// the event queue.
-unsafe impl Sync for EventQueue {}
-
 impl UnwindSafe for EventQueue {}
 impl RefUnwindSafe for EventQueue {}
 
@@ -683,10 +679,6 @@ pub(crate) struct EventQueueItem {
     /// has been transferred and no destructor needs to run.
     pub(crate) event: NonNull<u8>,
 }
-
-// SAFETY: Events are always Send + Sync.
-unsafe impl Send for EventQueueItem {}
-unsafe impl Sync for EventQueueItem {}
 
 /// Metadata for an event in the event queue.
 #[derive(Clone, Copy, Debug)]
@@ -802,9 +794,6 @@ impl<'a, E> EventMut<'a, E> {
         res
     }
 }
-
-unsafe impl<E: Send> Send for EventMut<'_, E> {}
-unsafe impl<E: Sync> Sync for EventMut<'_, E> {}
 
 impl<E> Deref for EventMut<'_, E> {
     type Target = E;
@@ -1269,7 +1258,7 @@ where
 /// being correct.
 pub unsafe trait EventSet {
     /// The set of event indices.
-    type EventIndices: Send + Sync + 'static;
+    type EventIndices: 'static;
 
     /// Creates the set of event indices.
     fn new_state(world: &mut World) -> Self::EventIndices;

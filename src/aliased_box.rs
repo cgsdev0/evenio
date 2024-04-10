@@ -163,10 +163,6 @@ impl<T: ?Sized> Drop for AliasedBox<T> {
     }
 }
 
-unsafe impl<T: ?Sized + Send> Send for AliasedBox<T> {}
-
-unsafe impl<T: ?Sized + Sync> Sync for AliasedBox<T> {}
-
 #[cfg(test)]
 mod tests {
     use super::*;

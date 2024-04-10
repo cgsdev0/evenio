@@ -866,11 +866,11 @@ impl World {
 
             let (handler_list, target_location) = match event_meta {
                 EventMeta::Untargeted { idx } => (
-                    unsafe {
+                    Some(unsafe {
                         self.handlers
                             .get_untargeted_list(idx)
                             .unwrap_debug_checked()
-                    },
+                    }),
                     EntityLocation::NULL,
                 ),
                 EventMeta::Targeted { idx, target } => {
@@ -885,15 +885,13 @@ impl World {
                             .unwrap_debug_checked()
                     };
 
-                    static EMPTY: HandlerList = HandlerList::new();
-
                     // Return an empty handler list instead of continuing in case this event is
                     // special.
-                    (arch.handler_list_for(idx).unwrap_or(&EMPTY), location)
+                    (arch.handler_list_for(idx), location)
                 }
             };
 
-            let handlers: *const [_] = handler_list.handlers();
+            let handlers: *const [_] = handler_list.map_or(&[], |list| list.handlers());
 
             let events_before = self.event_queue.len();
 
@@ -1176,11 +1174,6 @@ impl<'a> UnsafeWorldCell<'a> {
     }
 }
 
-// SAFETY: `&World` and `&mut World` are `Send`.
-unsafe impl Send for UnsafeWorldCell<'_> {}
-// SAFETY: `&World` and `&mut World` are `Sync`.
-unsafe impl Sync for UnsafeWorldCell<'_> {}
-
 #[cfg(test)]
 mod tests {
     use alloc::sync::Arc;
@@ -1298,7 +1291,7 @@ mod tests {
     /// Asserts that `World` has the expected auto trait implementations.
     fn _assert_auto_trait_impls()
     where
-        World: Send + Sync + UnwindSafe + RefUnwindSafe,
+        World: UnwindSafe + RefUnwindSafe,
         for<'a> &'a World: Send + Sync,
         for<'a> &'a mut World: Send + Sync,
     {

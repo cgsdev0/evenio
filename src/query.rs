@@ -66,9 +66,9 @@ pub unsafe trait Query {
     /// `Self`, but with a modified lifetime.
     type Item<'a>;
     /// Per-archetype state.
-    type ArchState: Send + Sync + fmt::Debug + 'static;
+    type ArchState: fmt::Debug + 'static;
     /// Cached data for fetch initialization.
-    type State: Send + Sync + fmt::Debug + 'static;
+    type State: fmt::Debug + 'static;
 
     /// Initialize the query. Returns an expression describing the components
     /// accessed by the query and a new instance of [`Self::State`].
@@ -782,11 +782,6 @@ impl<T> fmt::Debug for ColumnPtr<T> {
         f.debug_tuple("ColumnPtr").field(&self.0).finish()
     }
 }
-
-// SAFETY: `ColumnPtr` is just a wrapper around a pointer, so these impls are
-// safe on their own.
-unsafe impl<T> Send for ColumnPtr<T> {}
-unsafe impl<T> Sync for ColumnPtr<T> {}
 
 #[cfg(test)]
 mod tests {

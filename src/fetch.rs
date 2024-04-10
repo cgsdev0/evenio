@@ -668,11 +668,6 @@ impl<Q: Query> fmt::Debug for Iter<'_, Q> {
     }
 }
 
-// SAFETY: `Iter` iterates over component data only, which is always `Send` and
-// `Sync`.
-unsafe impl<Q: Query> Send for Iter<'_, Q> {}
-unsafe impl<Q: Query> Sync for Iter<'_, Q> {}
-
 #[cfg(feature = "rayon")]
 #[cfg_attr(docsrs, doc(cfg(feature = "rayon")))]
 pub use rayon_impl::*;

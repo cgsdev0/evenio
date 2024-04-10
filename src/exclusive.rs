@@ -15,10 +15,6 @@ pub struct Exclusive<T> {
     inner: T,
 }
 
-// SAFETY: Only `&mut` access to `T` is provided when `T: !Sync`, so this is
-// safe.
-unsafe impl<T> Sync for Exclusive<T> {}
-
 impl<T> Exclusive<T> {
     /// Create a new `Exclusive` wrapper.
     pub fn new(t: T) -> Self {
@@ -27,10 +23,7 @@ impl<T> Exclusive<T> {
 
     /// For types that implement [`Sync`], get an immutable reference to the
     /// underlying value.
-    pub fn get(&self) -> &T
-    where
-        T: Sync,
-    {
+    pub fn get(&self) -> &T {
         &self.inner
     }
 

@@ -184,9 +184,6 @@ impl Handlers {
     }
 }
 
-unsafe impl Send for Handlers {}
-unsafe impl Sync for Handlers {}
-
 impl Index<HandlerId> for Handlers {
     type Output = HandlerInfo;
 
@@ -470,8 +467,6 @@ pub(crate) struct HandlerList {
     after: u32,
     entries: Vec<HandlerInfoPtr>,
 }
-
-unsafe impl Sync for HandlerList {}
 
 impl HandlerList {
     pub(crate) const fn new() -> HandlerList {
@@ -763,7 +758,7 @@ impl<H: Handler> Handler for LowPriority<H> {
 /// handlers are added to a world using the [`World::add_handler`] method.
 ///
 /// For more information about handlers, see the [tutorial](crate::tutorial).
-pub trait Handler: Send + Sync + 'static {
+pub trait Handler: 'static {
     /// Returns the [`TypeId`] which uniquely identifies this handler, or `None`
     /// if there is none.
     ///
@@ -1024,7 +1019,7 @@ impl Default for MaybeInvalidAccess {
 /// data accessed by [`HandlerParam::get`].
 pub unsafe trait HandlerParam {
     /// Persistent data stored in the handler.
-    type State: Send + Sync + 'static;
+    type State: 'static;
 
     /// The type produced by this handler param. This is expected to be the type
     /// of `Self` but with the lifetime of `'a`.
@@ -1234,7 +1229,7 @@ where
 }
 
 /// Trait for functions whose parameters are [`HandlerParam`]s.
-pub trait HandlerParamFunction<Marker>: Send + Sync + 'static {
+pub trait HandlerParamFunction<Marker>: 'static {
     /// The handler params used by this function, combined into a single type.
     type Param: HandlerParam;
 
@@ -1246,7 +1241,7 @@ macro_rules! impl_handler_param_function {
     ($(($P:ident, $p:ident)),*) => {
         impl<F, $($P: HandlerParam),*> HandlerParamFunction<fn($($P),*)> for F
         where
-            F: FnMut($($P),*) + FnMut($($P::Item<'_>),*) + Send + Sync + 'static,
+            F: FnMut($($P),*) + FnMut($($P::Item<'_>),*) + 'static,
         {
             type Param = ($($P,)*);
 
