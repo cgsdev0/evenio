@@ -3,6 +3,10 @@
 ## Unreleased
 
 - Added `Deref` and `DerefMut` impls for `Single`, `TrySingle`, `Has<Q>`.
+- Allow sending events with borrowed data in `World::send`.
+- Removed `'static` bound from `Event`. `Event` is now an `unsafe` trait to implement.
+- Removed `World::send_many`.
+- Fixed bug where entities could spawn with identical entity IDs.
 
 ## 0.5.0 - 2024-04-07
 
